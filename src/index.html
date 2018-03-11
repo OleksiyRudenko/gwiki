@@ -76,8 +76,9 @@
     //window.gwikiBridge.addEventListener('init', function(e) { window.gwiki.init(e.target); });
 
     function handleClientLoad() {
+      window.gapi = gapi;
       gapi.load('client:auth2', function(){
-        window.gwikiBridge.init(gapi, YOUR_CLIENT_ID, DISCOVERY_DOCS, SCOPE, YOUR_API_KEY)
+        window.gwikiBridge.init(window.gapi, window.YOUR_CLIENT_ID, window.DISCOVERY_DOCS, window.SCOPE, window.YOUR_API_KEY)
       });
     }
 </script>
