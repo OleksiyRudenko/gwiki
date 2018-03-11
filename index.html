@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=2.0">
+    <title>GWiki</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="54b68dd17ea84df98f1efdc0e49996a3.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="afce0fd28fdd79c5752f7c81bf051ba8.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="e6c8e5fdc81284f18ba1969e57f5e0e7.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="bc089b90fed19f0818de8ecc91bf7c3e.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="9505438f68fa74ec86ac56e0a5382ef5.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="2c1d49652bce8d1e1697a4d73ebaf459.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="7e24104e6e67792f12b6a60179d7e809.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="49203c9911ed2f965f0a42e806a0546e.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="0309776760f1d1879b7cef80ea80c365.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="a419a3853ee55bec50fbaa9eb8274a34.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="927320fc6605f9a183313584fed89274.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="0f85d10e3c651ba9c4cd06ed3067c476.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="6af7b1ec6bcea6bdd7ee556a6d365b7f.png">
+    <link rel="manifest" href="bfe54e1aee2d1c67026889b962081846.js">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="42807b4a428ac4209775a64c61b87b78.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Bring in the Gwiki Styles -->
+    <link type="text/css" rel="stylesheet" href="db7d9c259586629e767d185dc09e5776.css">
+    <link type="text/css" rel="stylesheet" href="5b5c6f14a89b8d264c1bdea685a403d3.css">
+
+    <!-- Make sure we've got a markdown parser -->
+    <script>window.Markdown={};</script>
+    <script type="text/javascript" src="98c25d50fcb64a3914a8ef2121436769.js"></script>
+    <script type="text/javascript" src="05daf527672f453624934091b72d3e20.js"></script>
+
+    <!-- Now include all of our program libraries -->
+    <script type="text/javascript" src="535c65a49476e4d4f4cba87ad33baac3.js"></script>
+    <script type="text/javascript" src="208e68c6e0943135f19d2966bb099239.js"></script>
+    <script type="text/javascript" src="e8e697af3b94bbce0ff95771a3b34533.js"></script>
+    <script type="text/javascript" src="b0ca882f5fdf1d93b8447d59526657e4.js"></script>
+    <script type="text/javascript" src="3e319dbf7502d154f5dce9bf9051bd35.js"></script>
+
+    <!-- Local config (this is where YOUR_CLIENT_ID is set) -->
+    <script type="text/javascript" src="a5d3a3d3e541f040e494a039dbf66547.js"></script>
+</head>
+<body>
+
+<!-- Give the Gwiki a root element and it'll do the rest -->
+<div class="gwiki-ui">
+</div>
+
+<!-- Now initialize everything -->
+<script type="text/javascript">
+    // This is where you can customize.
+    // You might add more consumable types using `Gwiki.consumableTypes.push('my/mime.type')`,
+    // or you might change some of the interface strings by overriding keys in `GwikiUi.strings`
+
+
+    // Instantiate Gwiki workers (attach to window for easy debugging and playing)
+    window.gwiki = new Gwiki();
+    window.gwikiBridge = new GwikiBridge();
+    window.gwikiUI = new GwikiUI({
+        root : document.getElementsByClassName('gwiki-ui')[0],
+        gwiki: window.gwiki,
+        bridge : window.gwikiBridge,
+        markdownParser: function() { var c = new Markdown.Converter(); Markdown.Extra.init(c); this.markdownParser = c; },
+        defaultHome : null,
+        config: {
+            prettyUrls : false
+        }
+    });
+
+    // Hook everything up through events
+    window.gwikiBridge.addEventListener('init', function(e) { window.gwikiUI.init() });
+    //window.gwikiBridge.addEventListener('signinStatusChanged', function(e) { if (e.target.signedIn) gwiki.setHome('0BwZTf0F3YjSmcDN3TXRMc0lUeTQ'); });
+    //window.gwikiUI.subscribeGwikiListeners(window.gwiki);
+    //window.gwikiUI.subscribeGwikiBridgeListeners(window.gwikiBridge);
+    //window.gwikiBridge.addEventListener('init', function(e) { window.gwiki.init(e.target); });
+
+    function handleClientLoad() {
+      gapi.load('client:auth2', function(){
+        window.gwikiBridge.init(window.gapi, window.YOUR_CLIENT_ID, window.DISCOVERY_DOCS, window.SCOPE, window.YOUR_API_KEY)
+      });
+    }
+</script>
+
+<!-- Load google's api -->
+<script async="" defer="" src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad();" onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
+</body>
+</html>
