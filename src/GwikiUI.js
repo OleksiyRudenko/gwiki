@@ -601,7 +601,7 @@ GwikiUI.strings = {
     'displayTitle' : '<h1>Gwiki</h1>',
     'tagline' : '<p>A wiki interface for Google Drive</p>',
     'loading' : '<p>Loading...</p>',
-    'signinButton' : '<p><img class="g-signin" src="/assets/imgs/btn_google_signin_dark_normal_web.png"></p>',
+    'signinButton' : '<p><img class="g-signin" src="./imgs/btn_google_signin_dark_normal_web.png"></p>',
     'signedOut' : '<p>You were signed out! Please sign in again.</p>',
     'prompt-homefolder' : 'Home Folder: ',
 
