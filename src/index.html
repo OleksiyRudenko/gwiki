@@ -74,11 +74,17 @@
     //window.gwikiUI.subscribeGwikiListeners(window.gwiki);
     //window.gwikiUI.subscribeGwikiBridgeListeners(window.gwikiBridge);
     //window.gwikiBridge.addEventListener('init', function(e) { window.gwiki.init(e.target); });
+
+    function handleClientLoad() {
+      gapi.load('client:auth2', function(){
+        window.gwikiBridge.init(gapi, YOUR_CLIENT_ID, DISCOVERY_DOCS, SCOPE, YOUR_API_KEY)
+      });
+    }
 </script>
 
 <!-- Load google's api -->
 <script async defer src="https://apis.google.com/js/api.js"
-    onload="this.onload=function(){};gapi.load('client:auth2', function() { window.gwikiBridge.init(gapi, YOUR_CLIENT_ID, DISCOVERY_DOCS, SCOPE, YOUR_API_KEY) });"
+    onload="this.onload=function(){};handleClientLoad();"
     onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
 </body>

@@ -32,6 +32,7 @@ GwikiBridge.prototype.init = function(api, clientId, discoveryDocs, scope, apike
     // Initialize the google api
     if (apikey) this.api.client.setApiKey(apikey);
     this.api.client.init({
+        apiKey: apikey,
         clientId: clientId,
         discoveryDocs: discoveryDocs,
         scope: scope
