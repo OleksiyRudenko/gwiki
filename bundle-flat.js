@@ -34,12 +34,20 @@ config.destination = normalizeConfigPath(config.destination);
 config['entry-root-is'] = normalizeConfigPath(config['entry-root-is']);
 // console.log(config);
 
-// TODO: ensure and clean up the destination
+// ensure and clean up the destination dir
+try {
+  console.log('=== Cleaning up ' + config.destination);
+  fse.emptyDirSync(config.destination);
+  console.log('OK');
+} catch (err) {
+  console.log('ERROR: ' + err);
+}
 
 // make real root an array of path components
 var realRoot = splitPath(config['entry-root-is']);
 
 // build source code tree
+console.log('=== Building code base map from ' + config.entry);
 var codeBaseMap = extractCodeBaseFiles({}, config.entry, realRoot);
 
 console.log('Code base map:');
@@ -72,7 +80,11 @@ function getRealFilePath(fileRef, realRoot) {
   for (var i = 0, dir = ''; i < path.length - 1; i++) {
     dir = path.slice(0, i+1).join('/');
     if (path[i][0] !== '.' && isFile(dir)) {
-      path[i] = fs.readFileSync(dir, 'utf-8').toString().split('\n')[0].split('/').filter(function(el){return !!el;});
+      try {
+        path[i] = fs.readFileSync(dir, 'utf-8').toString().split('\n')[0].split('/').filter(function(el){return !!el;});
+      } catch (err) {
+        console.log('ERROR at getRealFilePath(): ' + err);
+      }
     }
   }
 
@@ -88,7 +100,11 @@ function getRealFilePath(fileRef, realRoot) {
  * @param {string} path
  */
 function isFile(path) {
-  return fs.lstatSync(path).isFile();
+  try {
+    return fs.lstatSync(path).isFile();
+  } catch (err) {
+    console.log('ERROR at isFile(): ' + err);
+  }
 }
 
 /**
