@@ -1,6 +1,7 @@
 'use strict';
 const fs = require('fs');
 const fse = require('fs-extra');
+const fextractor = require('file-extractor');
 const PARSEABLE_FILES = ['js', 'html', 'htm'];
 
 console.log('bundle-flat is a simple tool to collect all project files into a distribution directory flattening the code base tree structure.');
@@ -30,9 +31,10 @@ if (!config.help && !config.entry) process.exit(1);
 
 // normalize every path in config
 config.entry = normalizeConfigPath(config.entry);
+if (config.entry.slice(-1) === '/') config.entry += 'index.html';
 config.destination = normalizeConfigPath(config.destination);
 config['entry-root-is'] = normalizeConfigPath(config['entry-root-is']);
-// console.log(config);
+console.log(config);
 
 // ensure and clean up the destination dir
 try {
@@ -50,11 +52,13 @@ var realRoot = splitPath(config['entry-root-is']);
 console.log('=== Building code base map from ' + config.entry);
 var codeBaseMap = extractCodeBaseFiles({}, config.entry, realRoot);
 
-console.log('Code base map:');
+console.log('--- Code base map:');
 console.log(codeBaseMap);
 
 function extractCodeBaseFiles(fileMap, fileRef, realRoot) {
   var realFilePath = getRealFilePath(fileRef, realRoot);
+  console.log('--- extractCodeBaseFiles (urls):');
+  console.log(fileRef + ' => ' + realFilePath);
   var fileName = realFilePath.split('/').slice(-1)[0];
   fileMap[fileRef] = {
     realFilePath : realFilePath,
@@ -64,18 +68,32 @@ function extractCodeBaseFiles(fileMap, fileRef, realRoot) {
   // extract files from src
   var fileExt = fileName.split('.').slice(-1)[0].toLowerCase();
   if (PARSEABLE_FILES.includes(fileExt)) {
-    // TODO: extract files from src attribute
+    var stream = fs.createReadStream(realFilePath, {});
+    fextractor({urls:[]},{successive: true}).matches(/src=['"](.+?)['"]/ig, function(m, acc){
+      acc.urls.push(m[1]);
+    }).on('end', function(acc){
+      console.log('--- extractCodeBaseFiles (urls):');
+      acc.urls.forEach(function(url){
+        var prefix = url.slice(0,7);
+        if (!(prefix === 'https:/' || prefix === 'http://' || url.slice(0,2) === '//')) {
+          extractCodeBaseFiles(fileMap, url, realRoot);
+        }
+      });
+    }).start(stream);
   }
 
   return fileMap;
 }
 
 function getRealFilePath(fileRef, realRoot) {
+  console.log('--- getRealFilePath');
   var path = splitPath(fileRef);
+  console.log(fileRef);
+  console.log(path);
   if (!path[0]) {
-    path = [ ...realRoot, ...path];
+    path[0] = realRoot;
   }
-  console.log('getRealFilePath');
+  console.log(path);
   // if either part of path is a file whereas it should be a dir then get path component from there
   for (var i = 0, dir = ''; i < path.length - 1; i++) {
     dir = path.slice(0, i+1).join('/');
@@ -83,7 +101,7 @@ function getRealFilePath(fileRef, realRoot) {
       try {
         path[i] = fs.readFileSync(dir, 'utf-8').toString().split('\n')[0].split('/').filter(function(el){return !!el;});
       } catch (err) {
-        console.log('ERROR at getRealFilePath(): ' + err);
+        console.log('--- ERROR at getRealFilePath(): ' + err);
       }
     }
   }
@@ -103,7 +121,7 @@ function isFile(path) {
   try {
     return fs.lstatSync(path).isFile();
   } catch (err) {
-    console.log('ERROR at isFile(): ' + err);
+    console.log('--- ERROR at isFile(): ' + err);
   }
 }
 
@@ -114,7 +132,7 @@ function isFile(path) {
  */
 function splitPath(path) {
   var pathComponents = path.split('/');
-  if (!pathComponents[pathComponents.length-1]) pathComponents[pathComponents.length-1] = 'index.html';
+  // if (!pathComponents[pathComponents.length-1]) pathComponents[pathComponents.length-1] = 'index.html';
   pathComponents = pathComponents.filter(function(el) { return !!el});
   return pathComponents;
 }
