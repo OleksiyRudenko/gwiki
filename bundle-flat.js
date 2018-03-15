@@ -43,7 +43,7 @@ function bundle(config) {
 }
 
 /**
- *
+ * Builds code base map for a given file
  * @param {object} map - code base map
  * @param {string} fileRef - reference to a file
  * @param {string} realRoot - app real root location
