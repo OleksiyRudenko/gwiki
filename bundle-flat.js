@@ -72,7 +72,7 @@ async function mapCodeBaseFile(map, fileRef, realRoot) {
         return !(prefix === 'https:/' || prefix === 'http://' || url.slice(0,2) === '//');
       }).forEach(url => {
         map = mapCodeBaseFile(map, url, realRoot);
-        })
+      });
     }).start(stream);
   }
   return map;
