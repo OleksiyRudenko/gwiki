@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "bundle-flat": "node bundle-flat.js public_html/ --destination=dist --entry-root-is=public_html/",
+    "bundle-flat": "node bundle-flat.js public_html/ --destination=dist --verbose",
     "push-gh-pages": "push-dir --dir=dist --branch=gh-pages --cleanup --verbose"
   },
   "devDependencies": {
