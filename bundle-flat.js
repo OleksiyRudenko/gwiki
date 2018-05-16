@@ -13,6 +13,7 @@ const fsx = {
   emptyDir: promisify(fse.emptyDir),
 };
 
+// default config
 let config = {
   entry: null,
   destination: './dist',
@@ -22,27 +23,37 @@ let config = {
   watch: false,
 };
 
-parseConfig(config).then(configParsed => {
-  config = configParsed;
-  return true;
-}).then(() => {
-  if (config.help || !config.entry) helpUsage();
-  if (!config.help && !config.entry) process.exit(1);
-  return true;
-}).then(() => {
-  // Main task
-  return bundle();
-}).catch(console.error);
+parseConfig(config)
+  .then(configParsed => {
+    config = configParsed;
+    return true;
+  })
+  .then(() => {
+    if (config.help || !config.entry) helpUsage();
+    if (!config.help && !config.entry) process.exit(1);
+    return true;
+  })
+  .then(() => {
+    // Main task
+    return bundle();
+  })
+  .then(r => console.log('BUNDLE: ', r))
+  .catch(console.error);
 
 /**
  * Bundles code base using settings from config
+ * Returns true
  */
 function bundle() {
   // ensure and clean up the destination dir
-  makeCleanPath(config.destination).catch(Promise.reject);
-  // collect local project files
-  let codeBaseMap = mapCodeBaseFile({}, config.entry, config['real-root-is']);
-  config.verbose && console.log('bundle(): === Code Base Map:', codeBaseMap);
+  return makeCleanPath(config.destination)
+    .then(() => {
+      // collect local project files
+      let codeBaseMap = mapCodeBaseFile({}, config.entry, config['real-root-is']);
+      config.verbose && console.log('bundle(): === Code Base Map:', codeBaseMap);
+      return true;
+    })
+    .catch(Promise.reject);
 }
 
 
@@ -133,9 +144,9 @@ function resolveSymLinks(path) {
       dir = resolvedPathComponents.slice(0, i+1).join('/');
       if (isFile(dir)) {
         try {
-          config.verbose && console.log(resolvedPathComponents[i] + ' >>');
+          config.verbose && console.log('resolveSymLinks(): ' + resolvedPathComponents[i] + ' >>');
           resolvedPathComponents[i] = fs.readFileSync(dir, 'utf-8').toString().split('\n')[0].split('/').filter(function(el){return !!el;}).join('/');
-          config.verbose && console.log('>> ' + resolvedPathComponents[i]);
+          config.verbose && console.log('resolveSymLinks(): >> ' + resolvedPathComponents[i]);
         } catch (err) {
           console.log('resolveSymLinks(): --- ERROR ' + err);
           process.exit(1);
