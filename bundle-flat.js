@@ -79,9 +79,7 @@ async function mapCodeBaseFile(map, fileRef, realRoot) {
     fextractor({urls:[]}, {successive: true}).matches(/src=['"](.+?)['"]/ig, (m, acc) => {
       acc.urls.push(m[1]);
     }).on('end', (acc) => {
-      if (config.verbose) {
-        console.log('mapCodeBaseFile(): extracted codebase files (urls):', acc.urls);
-      }
+      config.verbose && console.log('mapCodeBaseFile(): extracted codebase files (urls):', acc.urls);
       acc.urls.filter(url => {
         const prefix = url.slice(0,7);
         return !(prefix === 'https:/' || prefix === 'http://' || url.slice(0,2) === '//');
@@ -101,7 +99,7 @@ async function mapCodeBaseFile(map, fileRef, realRoot) {
  * @returns {string} resolved path relative to project root
  */
 function resolvePath(path, realRoot = '', defaultFileIfNone = 'index.html') {
-  if (config.verbose) console.log('resolvePath(): Resolving path ' + path);
+  config.verbose && console.log('resolvePath(): Resolving path ' + path);
   if (!path.length) path = './';
   let resolvedPathComponents = path.split('/');
   if (resolvedPathComponents.length && !resolvedPathComponents[0] && realRoot.length) {
@@ -127,7 +125,7 @@ function resolvePath(path, realRoot = '', defaultFileIfNone = 'index.html') {
  * @returns {string} resolved path
  */
 function resolveSymLinks(path) {
-  if (config.verbose) console.log('resolveSymLinks(): Resolving symlinks @ ' + path);
+  config.verbose && console.log('resolveSymLinks(): Resolving symlinks @ ' + path);
   let resolvedPathComponents = path.split('/');
   for (let i = 0, dir = ''; i < resolvedPathComponents.length - 1; i++) {
     // skip empty entries and current and parent folders aliases
@@ -135,9 +133,9 @@ function resolveSymLinks(path) {
       dir = resolvedPathComponents.slice(0, i+1).join('/');
       if (isFile(dir)) {
         try {
-          if (config.verbose) console.log(resolvedPathComponents[i] + ' >>');
+          config.verbose && console.log(resolvedPathComponents[i] + ' >>');
           resolvedPathComponents[i] = fs.readFileSync(dir, 'utf-8').toString().split('\n')[0].split('/').filter(function(el){return !!el;}).join('/');
-          if (config.verbose) console.log('>> ' + resolvedPathComponents[i]);
+          config.verbose && console.log('>> ' + resolvedPathComponents[i]);
         } catch (err) {
           console.log('resolveSymLinks(): --- ERROR ' + err);
           process.exit(1);
@@ -209,7 +207,7 @@ function parseConfig(config) {
       }
     }
   });
-  if (config.verbose) console.log('parseConfig() config', config);
+  config.verbose && console.log('parseConfig() config', config);
   if (config.entry) {
     // resolve paths
     config.entry = resolvePath(config.entry);
@@ -222,7 +220,7 @@ function parseConfig(config) {
     }
   }
 
-  if (config.verbose) console.log('parseConfig() entry parsed', config);
+  config.verbose && console.log('parseConfig() parsed result', config);
   return Promise.resolve(config);
 }
 
