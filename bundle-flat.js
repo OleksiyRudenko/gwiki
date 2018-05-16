@@ -13,13 +13,13 @@ let config = {
   flatten: false,
   watch: false,
 };
-config = parseConfig(config);
-if (!config.help && !config.entry) process.exit(1);
 
-// Main task
-
-bundle(config);
-
+parseConfig(config).then(config => {
+  if (config.help || !config.entry) helpUsage();
+  if (!config.help && !config.entry) process.exit(1);
+  // Main task
+  bundle(config);
+});
 
 /**
  * Bundles code base using settings
@@ -209,8 +209,7 @@ function parseConfig(config) {
   }
 
   if (config.verbose) console.log(config);
-  if (config.help || !config.entry) helpUsage();
-  return config;
+  return Promise.resolve(config);
 }
 
 function helpUsage() {
