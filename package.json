@@ -12,6 +12,7 @@
     "push-gh-pages": "push-dir --dir=dist --branch=gh-pages --cleanup --verbose"
   },
   "devDependencies": {
+    "es6-promisify": "^6.0.0",
     "file-extractor": "^0.6.1",
     "fs": "^0.0.1-security",
     "fs-extra": "^5.0.0"

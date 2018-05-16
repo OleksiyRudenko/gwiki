@@ -1,4 +1,5 @@
 'use strict';
+const promisify = require('es6-promisify');
 const fs = require('fs');
 const fse = require('fs-extra');
 const fextractor = require('file-extractor');
@@ -208,8 +209,12 @@ function parseConfig(config) {
   }
 
   if (config.verbose) console.log(config);
-  if (config.help || !config.entry) {
-    console.log(`bundle-flat is a simple tool to collect all project files into a distribution directory flattening the code base tree structure.
+  if (config.help || !config.entry) helpUsage();
+  return config;
+}
+
+function helpUsage() {
+  console.log(`bundle-flat is a simple tool to collect all project files into a distribution directory flattening the code base tree structure.
 It parses source code starting from entry point, collects files referred to in script and img src attributes and puts those flat into a destination directory. 
 Fully qualified URLs are ignored.
 If either part of partial url is a file then such part is replaced with contents of the file assuming the file contains a path fragment (a feature from some web servers).
@@ -222,6 +227,4 @@ Usage: node bundle-flat <entryPoint> [options...]
   --verbose - log activities; default mode is silent
   --flatten - puts files into destination with a flat structure
   --watch - updates destination whenever source code base files get amended`);
-  }
-  return config;
 }
