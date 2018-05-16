@@ -1,5 +1,5 @@
 'use strict';
-const promisify = require('es6-promisify');
+const {promisify} = require('es6-promisify');
 const fs = require('fs');
 const fse = require('fs-extra');
 const fextractor = require('file-extractor');
@@ -22,33 +22,40 @@ let config = {
   watch: false,
 };
 
-parseConfig(config).then(config => {
+parseConfig(config).then(configParsed => {
+  config = configParsed;
+  return true;
+}).then(() => {
   if (config.help || !config.entry) helpUsage();
   if (!config.help && !config.entry) process.exit(1);
+  return true;
+}).then(() => {
   // Main task
-  bundle(config);
-});
+  return bundle();
+}).catch(console.error);
 
 /**
- * Bundles code base using settings
- * @param {object} config
+ * Bundles code base using settings from config
  */
-function bundle(config) {
+function bundle() {
   // ensure and clean up the destination dir
-  try {
-    if (config.verbose) console.log('=== Cleaning up ' + config.destination);
-    fse.emptyDirSync(config.destination);
-    if (config.verbose) console.log('OK');
-  } catch (err) {
-    console.log('ERROR at bundle(): ' + err);
-    process.exit(1);
-  }
+  makeCleanPath(config.destination).catch(Promise.reject);
   // collect local project files
   let codeBaseMap = mapCodeBaseFile({}, config.entry, config['real-root-is']);
-  if (config.verbose) {
-    console.log('=== Code Base Map:');
-    console.log(codeBaseMap);
-  }
+  config.verbose && console.log('bundle(): === Code Base Map:', codeBaseMap);
+}
+
+
+/**
+ * Creates and/or cleans up path
+ * @param {string} path
+ * @returns {Promise<T>}
+ */
+function makeCleanPath(path) {
+  config.verbose && console.log('makeCleanPath(): === Cleaning up ' + config.destination);
+  return fsx.emptyDir(path)
+    .then(() => { config.verbose && console.log('makeCleanPath(): OK'); return true; })
+    .catch(err => Promise.reject('makeCleanPath(): --- ERROR ' + err));
 }
 
 /**
@@ -73,8 +80,7 @@ async function mapCodeBaseFile(map, fileRef, realRoot) {
       acc.urls.push(m[1]);
     }).on('end', (acc) => {
       if (config.verbose) {
-        console.log('--- extractCodeBaseFiles (urls):');
-        console.log(acc.urls);
+        console.log('mapCodeBaseFile(): extracted codebase files (urls):', acc.urls);
       }
       acc.urls.filter(url => {
         const prefix = url.slice(0,7);
@@ -95,7 +101,7 @@ async function mapCodeBaseFile(map, fileRef, realRoot) {
  * @returns {string} resolved path relative to project root
  */
 function resolvePath(path, realRoot = '', defaultFileIfNone = 'index.html') {
-  if (config.verbose) console.log('Resolving path ' + path);
+  if (config.verbose) console.log('resolvePath(): Resolving path ' + path);
   if (!path.length) path = './';
   let resolvedPathComponents = path.split('/');
   if (resolvedPathComponents.length && !resolvedPathComponents[0] && realRoot.length) {
@@ -121,7 +127,7 @@ function resolvePath(path, realRoot = '', defaultFileIfNone = 'index.html') {
  * @returns {string} resolved path
  */
 function resolveSymLinks(path) {
-  if (config.verbose) console.log('Resolving symlinks @ ' + path);
+  if (config.verbose) console.log('resolveSymLinks(): Resolving symlinks @ ' + path);
   let resolvedPathComponents = path.split('/');
   for (let i = 0, dir = ''; i < resolvedPathComponents.length - 1; i++) {
     // skip empty entries and current and parent folders aliases
@@ -133,7 +139,7 @@ function resolveSymLinks(path) {
           resolvedPathComponents[i] = fs.readFileSync(dir, 'utf-8').toString().split('\n')[0].split('/').filter(function(el){return !!el;}).join('/');
           if (config.verbose) console.log('>> ' + resolvedPathComponents[i]);
         } catch (err) {
-          console.log('--- ERROR at resolveSymLinks(): ' + err);
+          console.log('resolveSymLinks(): --- ERROR ' + err);
           process.exit(1);
         }
       }
@@ -161,7 +167,7 @@ function isFile(path) {
   try {
     return fs.lstatSync(path).isFile();
   } catch (err) {
-    console.log('--- ERROR at isFile(): ' + err);
+    console.log('isFile(): --- ERROR ' + err);
     process.exit(1);
   }
 }
@@ -203,7 +209,7 @@ function parseConfig(config) {
       }
     }
   });
-  if (config.verbose) console.log(config);
+  if (config.verbose) console.log('parseConfig() config', config);
   if (config.entry) {
     // resolve paths
     config.entry = resolvePath(config.entry);
@@ -216,7 +222,7 @@ function parseConfig(config) {
     }
   }
 
-  if (config.verbose) console.log(config);
+  if (config.verbose) console.log('parseConfig() entry parsed', config);
   return Promise.resolve(config);
 }
 
@@ -234,4 +240,5 @@ Usage: node bundle-flat <entryPoint> [options...]
   --verbose - log activities; default mode is silent
   --flatten - puts files into destination with a flat structure
   --watch - updates destination whenever source code base files get amended`);
+  return Promise.resolve(true);
 }
