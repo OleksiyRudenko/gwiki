@@ -5,6 +5,14 @@ const fse = require('fs-extra');
 const fextractor = require('file-extractor');
 const PARSEABLE_FILES = ['js', 'html', 'htm'];
 
+// promisify async methods
+const fsx = {
+  createReadStream: promisify(fs.createReadStream),
+  readFile: promisify(fs.readFile),
+  lstat: promisify(fs.lstat),
+  emptyDir: promisify(fse.emptyDir),
+};
+
 let config = {
   entry: null,
   destination: './dist',
